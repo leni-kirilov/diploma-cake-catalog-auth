@@ -1,0 +1,3 @@
+include 'cake-catalog-auth-client'
+include 'cake-catalog-auth-server'
+
