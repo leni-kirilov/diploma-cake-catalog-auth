@@ -1,24 +1,20 @@
-package com.cakecatalog.srv.auth.domain;
+package com.cakecatalog.srv.auth.client.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Version;
+public class PortalUserResponse {
 
-@Entity
-public class PortalUser {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
-  @Version
-  private Long version;
-
   private String name;
   private String email;
   private String password;
+
+  @Override
+  public String toString() {
+    return "PortalUserResponse{" +
+      "id=" + getId() +
+      ", name='" + getName() + '\'' +
+      ", email='" + getEmail() + '\'' +
+      '}';
+  }
 
   public Long getId() {
     return id;
@@ -26,14 +22,6 @@ public class PortalUser {
 
   public void setId(Long id) {
     this.id = id;
-  }
-
-  public Long getVersion() {
-    return version;
-  }
-
-  public void setVersion(Long version) {
-    this.version = version;
   }
 
   public String getName() {

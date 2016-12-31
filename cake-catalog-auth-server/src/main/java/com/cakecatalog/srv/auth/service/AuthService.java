@@ -15,18 +15,14 @@ public class AuthService {
   @Autowired
   PortalUserRepository repository;
 
-  public boolean login(String email, String password) {
+  public PortalUser login(String email, String password) {
     PortalUser existingUser = repository.findOneByEmail(email);
-    log.info("Found user: " + (existingUser != null ? existingUser.email : null));
+    log.info("Found user: " + (existingUser != null ? existingUser.getEmail() : null));
     if (existingUser != null) {
       log.info("Checking passwords:...");
-      return existingUser.password.equals(password);
+      return existingUser.getPassword().equals(password) ? existingUser : null;
     }
 
-    return false;
+    return null;
   }
 }
-
-
-//curl -k -X POST -H "Content-Type: application/json" 'http://localhost:8080/login' -d '{"email":"sample@email.com","password":"samplePassword"}'
-//curl -k -X GET -H "Content-Type: application/json" 'http://localhost:8080/hello'
