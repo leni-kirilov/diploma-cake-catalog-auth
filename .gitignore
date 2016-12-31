@@ -1,6 +1,5 @@
 .gradle
 /build/
-!cake-catalog-auth-server/gradle/wrapper/gradle-wrapper.jar
 
 ### STS ###
 .apt_generated
