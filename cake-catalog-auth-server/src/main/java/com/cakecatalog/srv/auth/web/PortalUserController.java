@@ -19,13 +19,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Consumes(MediaType.APPLICATION_JSON)
 public class PortalUserController {
 
-//  //TODO remove this
-//  @Autowired
-//  PortalUserRepository repository;
-
   @Autowired
   AuthService authService;
-
 
 //  @GET
 //  @RequestMapping("/test")
@@ -43,24 +38,9 @@ public class PortalUserController {
   }
 
 
-  //TODO define REST interface - login, logout, createUser, editUser, getUser
+  //TODO define REST interface - logout, editUser, getUser
 
-  //TODO connect to PostgreSql DB
   //TODO create services that uses repositories
 
   //TODO move liquibase changelog to this app
-
-  @XmlRootElement
-  static public class MyJaxbBean {
-    public String name;
-    public int age;
-
-    public MyJaxbBean() {
-    } // JAXB needs this
-
-    public MyJaxbBean(String name, int age) {
-      this.name = name;
-      this.age = age;
-    }
-  }
 }

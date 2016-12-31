@@ -17,10 +17,10 @@ public class AuthService {
 
   public boolean login(String email, String password) {
     PortalUser existingUser = repository.findOneByEmail(email);
-    log.info("Found user: " + (existingUser != null ? existingUser.email : null));
+    log.info("Found user: " + (existingUser != null ? existingUser.getEmail() : null));
     if (existingUser != null) {
       log.info("Checking passwords:...");
-      return existingUser.password.equals(password);
+      return existingUser.getPassword().equals(password);
     }
 
     return false;
