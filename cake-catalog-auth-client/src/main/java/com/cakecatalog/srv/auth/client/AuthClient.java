@@ -1,11 +1,13 @@
 package com.cakecatalog.srv.auth.client;
 
 import com.cakecatalog.srv.auth.client.model.CreatePortalUserRequest;
-import com.cakecatalog.srv.auth.client.model.CreatePortalUserResponse;
 import com.cakecatalog.srv.auth.client.model.LoginRequest;
+import com.cakecatalog.srv.auth.client.model.PortalUserResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
 
 public class AuthClient {
 
@@ -21,50 +23,115 @@ public class AuthClient {
     this("http://localhost:8008/");
   }
 
+  /**
+   * Pass the base URL to the AuthService
+   * @param url
+   */
   AuthClient(String url) {
     this.url = url;
     restTemplate = new RestTemplate();
   }
 
-  public boolean login(LoginRequest loginRequest) {
+  /**
+   * Checks user credentials
+   *
+   * @param loginRequest - email and pass
+   * @return logged user object or null if not succesful
+   */
+  public PortalUserResponse login(LoginRequest loginRequest) {
     log.info("Trying to log for user: " + loginRequest.getEmail());
-    Boolean isLoginSuccessful = restTemplate.postForObject(
+    PortalUserResponse loggedUser = restTemplate.postForObject(
       url + LOGIN_URL,
       loginRequest,
-      Boolean.class);
-    return isLoginSuccessful;
+      PortalUserResponse.class);
+    return loggedUser;
   }
 
-  public CreatePortalUserResponse createPortalUser(String name, String email, String password) {
+  /**
+   * Create a new user
+   * @param name
+   * @param email
+   * @param password
+   * @return result object
+   */
+  public PortalUserResponse createPortalUser(String name, String email, String password) {
     log.info("Trying to create user: " + email);
 
-    CreatePortalUserResponse createdUser = restTemplate.postForObject(
+    PortalUserResponse createdUser = restTemplate.postForObject(
       url + PORTAL_USERS_URL,
       new CreatePortalUserRequest(name, email, password),
-      CreatePortalUserResponse.class);
+      PortalUserResponse.class);
+
+    createdUser.setPassword(null);//hide password
 
     return createdUser;
   }
 
+  /**
+   * Update an existing user
+   * @param userId
+   * @param name
+   * @param password
+   */
+  public void updatePortalUser(Long userId, String name, String password) {
+    log.info("Trying to updating existing user with id: " + userId);
 
+    PortalUserResponse portalUser = getPortalUser(userId);
+    portalUser.setName(name);
+    portalUser.setPassword(password);
 
+    //this updates the whole object, thus we get the whole user object first
+    restTemplate.put(
+      url + PORTAL_USERS_URL + "/" + userId,
+      portalUser);
+  }
 
+  /**
+   * Get a user object by its ID
+   * @param userId
+   * @return
+   */
+  public PortalUserResponse getPortalUser(Long userId) {
+    log.info("Trying to get user with id: " + userId);
 
+    PortalUserResponse user = restTemplate.getForObject(
+      URI.create(url + PORTAL_USERS_URL + "/" + userId),
+      PortalUserResponse.class);
+
+    user.setPassword(null);//hide password
+
+    return user;
+  }
 
   //TODO need a client test
   public static void main(String args[]) {
+    testUpdate();
     testCreate();
-//    testLogin();
+    testLogin();
+  }
+
+  private static void testUpdate() {
+    log.info("Create + Updating + getting");
+    AuthClient authClient = new AuthClient();
+
+    PortalUserResponse createdUser = authClient.createPortalUser("name", "email", "pass");
+
+    authClient.updatePortalUser(createdUser.getId(), "email-100", "pass-100");
+
+    assert authClient.getPortalUser(createdUser.getId()).getEmail() == "email-100";
   }
 
   private static void testCreate() {
-    CreatePortalUserResponse createdPortalUser = new AuthClient().createPortalUser("name", "email", "pass");
+    PortalUserResponse createdPortalUser = new AuthClient().createPortalUser("name", "email", "pass");
     log.info("Creation was successful?: " + createdPortalUser);
   }
 
   private static void testLogin() {
-    boolean isSuccess = new AuthClient().login(new LoginRequest("sample@email.com", "samplePassword"));
-    log.info("Login is successful?: " + isSuccess);
+    PortalUserResponse user = new AuthClient().login(new LoginRequest("sample@email.com", "samplePassword"));
+    log.info("Login is successful?: " + (user != null));
+
+    PortalUserResponse user2 = new AuthClient().login(new LoginRequest("sample@email.com", "wrong-pass"));
+    log.info("Login is successful?: " + (user2 != null));
   }
 
 }

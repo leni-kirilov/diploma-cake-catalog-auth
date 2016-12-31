@@ -1,14 +1,15 @@
 package com.cakecatalog.srv.auth.client.model;
 
-public class CreatePortalUserResponse {
+public class PortalUserResponse {
 
   private Long id;
   private String name;
   private String email;
+  private String password;
 
   @Override
   public String toString() {
-    return "CreatePortalUserResponse{" +
+    return "PortalUserResponse{" +
       "id=" + getId() +
       ", name='" + getName() + '\'' +
       ", email='" + getEmail() + '\'' +
@@ -37,5 +38,13 @@ public class CreatePortalUserResponse {
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 }
