@@ -13,4 +13,7 @@ public class CakeCatalogAuthSrvApplicationTests {
 	public void contextLoads() {
 	}
 
+
+	//TODO make 1 meaningful test
+	//TODO make travis yml
 }
