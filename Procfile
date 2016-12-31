@@ -1,0 +1,1 @@
+web: gradle bootRun -Dspring.profiles.active=prod --Port=$PORT
