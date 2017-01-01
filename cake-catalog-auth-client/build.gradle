@@ -31,8 +31,5 @@ repositories {
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-jersey')
-//    compile('org.springframework:spring-web:4.3.5.RELEASE')
-//    compile('org.slf4j:slf4j-api:1.7.22')
-//    compile('org.slf4j:jcl-over-slf4j:1.7.22')
-//    compile('org.springframework.boot:springboot-starter-web')
+    compile('org.apache.httpcomponents:httpclient:4.4.1')
 }
