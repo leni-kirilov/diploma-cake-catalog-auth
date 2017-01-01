@@ -4,6 +4,9 @@ import com.cakecatalog.srv.auth.client.model.CreatePortalUserRequest;
 import com.cakecatalog.srv.auth.client.model.LoginRequest;
 import com.cakecatalog.srv.auth.client.model.PortalUserResponse;
 import com.cakecatalog.srv.auth.client.model.UpdatePortalUserRequest;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -12,6 +15,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.HostnameVerifier;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +32,7 @@ public class AuthClient {
   private RestTemplate restTemplate;
 
   AuthClient() {
-    this("http://localhost:8008/");
+    this("https://cake-catalog-auth.herokuapp.com/");
   }
 
   AuthClient(String url) {
@@ -50,6 +54,8 @@ public class AuthClient {
     HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
     requestFactory.setConnectTimeout(10000);
     requestFactory.setReadTimeout(10000);
+    CloseableHttpClient httpClient = HttpClientBuilder.create().setSSLHostnameVerifier(SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER).build();
+    requestFactory.setHttpClient(httpClient);
 
     this.restTemplate.setRequestFactory(requestFactory);
   }
