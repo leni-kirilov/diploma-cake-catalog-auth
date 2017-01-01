@@ -25,7 +25,7 @@ public class PortalUserController {
   @POST
   @RequestMapping("/login")
   @ResponseBody
-  PortalUser login(@RequestBody LoginRequest loginRequest) {
+  public PortalUser login(@RequestBody LoginRequest loginRequest) {
     return authService.login(loginRequest.email, loginRequest.password);
   }
 

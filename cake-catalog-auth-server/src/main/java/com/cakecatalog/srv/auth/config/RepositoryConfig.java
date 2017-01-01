@@ -1,4 +1,4 @@
-package com.cakecatalog.srv.auth;
+package com.cakecatalog.srv.auth.config;
 
 import com.cakecatalog.srv.auth.domain.PortalUser;
 import org.springframework.context.annotation.Configuration;
