@@ -3,11 +3,18 @@ package com.cakecatalog.srv.auth.client;
 import com.cakecatalog.srv.auth.client.model.CreatePortalUserRequest;
 import com.cakecatalog.srv.auth.client.model.LoginRequest;
 import com.cakecatalog.srv.auth.client.model.PortalUserResponse;
+import com.cakecatalog.srv.auth.client.model.UpdatePortalUserRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AuthClient {
 
@@ -17,19 +24,34 @@ public class AuthClient {
   public static final String PORTAL_USERS_URL = "/portalUsers";
 
   private String url;
+  private String sourceId;
   private RestTemplate restTemplate;
 
   AuthClient() {
     this("http://localhost:8008/");
   }
 
+  AuthClient(String url) {
+    this(url, "AUTH_CLIENT");
+  }
+
   /**
    * Pass the base URL to the AuthService
+   *
    * @param url
+   * @param sourceId - who is the caller to this service
    */
-  AuthClient(String url) {
+  AuthClient(String url, String sourceId) {
+    log.info("Starting with url " + url);
     this.url = url;
-    restTemplate = new RestTemplate();
+    this.restTemplate = new RestTemplate();
+    this.sourceId = sourceId;
+
+    HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+    requestFactory.setConnectTimeout(10000);
+    requestFactory.setReadTimeout(10000);
+
+    this.restTemplate.setRequestFactory(requestFactory);
   }
 
   /**
@@ -40,15 +62,17 @@ public class AuthClient {
    */
   public PortalUserResponse login(LoginRequest loginRequest) {
     log.info("Trying to log for user: " + loginRequest.getEmail());
+
     PortalUserResponse loggedUser = restTemplate.postForObject(
       url + LOGIN_URL,
-      loginRequest,
+      new HttpEntity<>(loginRequest, getHeaders()),
       PortalUserResponse.class);
     return loggedUser;
   }
 
   /**
    * Create a new user
+   *
    * @param name
    * @param email
    * @param password
@@ -59,35 +83,31 @@ public class AuthClient {
 
     PortalUserResponse createdUser = restTemplate.postForObject(
       url + PORTAL_USERS_URL,
-      new CreatePortalUserRequest(name, email, password),
+      new HttpEntity<>(new CreatePortalUserRequest(name, email, password), getHeaders()),
       PortalUserResponse.class);
-
-    createdUser.setPassword(null);//hide password
 
     return createdUser;
   }
 
   /**
    * Update an existing user
+   *
    * @param userId
    * @param name
    * @param password
    */
-  public void updatePortalUser(Long userId, String name, String password) {
+  public PortalUserResponse updatePortalUser(Long userId, String name, String password) {
     log.info("Trying to updating existing user with id: " + userId);
 
-    PortalUserResponse portalUser = getPortalUser(userId);
-    portalUser.setName(name);
-    portalUser.setPassword(password);
-
-    //this updates the whole object, thus we get the whole user object first
-    restTemplate.put(
+    return restTemplate.patchForObject(
       url + PORTAL_USERS_URL + "/" + userId,
-      portalUser);
+      new HttpEntity<>(new UpdatePortalUserRequest(name, password), getHeaders()),
+      PortalUserResponse.class);
   }
 
   /**
    * Get a user object by its ID
+   *
    * @param userId
    * @return
    */
@@ -98,9 +118,16 @@ public class AuthClient {
       URI.create(url + PORTAL_USERS_URL + "/" + userId),
       PortalUserResponse.class);
 
-    user.setPassword(null);//hide password
-
     return user;
+  }
+
+  private MultiValueMap<String, String> getHeaders() {
+    MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+    List<String> values = new ArrayList<>();
+    values.add(sourceId);
+    headers.put("x-cake-catalog-source-id", values);
+    //TODO think about request-id
+    return headers;
   }
 
   //TODO need a client test
@@ -116,9 +143,16 @@ public class AuthClient {
 
     PortalUserResponse createdUser = authClient.createPortalUser("name", "email", "pass");
 
-    authClient.updatePortalUser(createdUser.getId(), "email-100", "pass-100");
+    PortalUserResponse updated = authClient.updatePortalUser(createdUser.getId(), "name-100", "pass-100");
 
-    assert authClient.getPortalUser(createdUser.getId()).getEmail() == "email-100";
+    log.info("Asserting the returned object: " + updated);
+    if (updated.getEmail() == null) {
+      throw new RuntimeException("Email is null");
+    }
+    if (updated.getEmail().equals("em1ail")) {
+      throw new RuntimeException("Wrong email value");
+    }
+    log.info("Asserts success");
   }
 
   private static void testCreate() {
