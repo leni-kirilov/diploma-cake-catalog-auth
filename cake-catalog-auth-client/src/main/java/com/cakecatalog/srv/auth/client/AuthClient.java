@@ -15,7 +15,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.HostnameVerifier;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +29,6 @@ public class AuthClient {
   private String url;
   private String sourceId;
   private RestTemplate restTemplate;
-
-  AuthClient() {
-    this("https://cake-catalog-auth.herokuapp.com/");
-  }
 
   AuthClient(String url) {
     this(url, "AUTH_CLIENT");
@@ -138,14 +133,17 @@ public class AuthClient {
 
   //TODO need a client test
   public static void main(String args[]) {
-    testUpdate();
-    testCreate();
-    testLogin();
+    AuthClient local = new AuthClient("http://localhost:8008/");
+//    AuthClient remote = new AuthClient("https://cake-catalog-auth.herokuapp.com/");
+
+    AuthClient testClient = local;
+    testUpdate(testClient);
+    testCreate(testClient);
+    testLogin(testClient);
   }
 
-  private static void testUpdate() {
+  private static void testUpdate(AuthClient authClient) {
     log.info("Create + Updating + getting");
-    AuthClient authClient = new AuthClient();
 
     PortalUserResponse createdUser = authClient.createPortalUser("name", "email", "pass");
 
@@ -161,16 +159,16 @@ public class AuthClient {
     log.info("Asserts success");
   }
 
-  private static void testCreate() {
-    PortalUserResponse createdPortalUser = new AuthClient().createPortalUser("name", "email", "pass");
+  private static void testCreate(AuthClient authClient) {
+    PortalUserResponse createdPortalUser = authClient.createPortalUser("name", "email", "pass");
     log.info("Creation was successful?: " + createdPortalUser);
   }
 
-  private static void testLogin() {
-    PortalUserResponse user = new AuthClient().login(new LoginRequest("sample@email.com", "samplePassword"));
+  private static void testLogin(AuthClient authClient) {
+    PortalUserResponse user = authClient.login(new LoginRequest("sample@email.com", "samplePassword"));
     log.info("Login is successful?: " + (user != null));
 
-    PortalUserResponse user2 = new AuthClient().login(new LoginRequest("sample@email.com", "wrong-pass"));
+    PortalUserResponse user2 = authClient.login(new LoginRequest("sample@email.com", "wrong-pass"));
     log.info("Login is successful?: " + (user2 != null));
   }
 
