@@ -7,8 +7,8 @@ public class LoginRequest {
   public LoginRequest() {
   } // JAXB needs this
 
-  public LoginRequest(String name, String age) {
-    this.setEmail(name);
+  public LoginRequest(String email, String age) {
+    this.setEmail(email);
     this.setPassword(age);
   }
 
