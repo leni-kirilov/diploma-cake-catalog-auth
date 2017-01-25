@@ -6,7 +6,8 @@ Java 8 (7 for client)
 Gradle
 Mysql
 
-```CREATE DATABASE cake_catalog_auth
+```
+CREATE DATABASE cake_catalog_auth
 
 CREATE TABLE portal_user
 (
